@@ -32,10 +32,6 @@ export default function Generate() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    console.log("Google API Key:", process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
-  }, []);
-
   const handleSubmit = async () => {
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -44,11 +40,10 @@ export default function Generate() {
       },
       body: JSON.stringify({ text }), // Send JSON payload
     });
-  
+
     const data = await res.json();
     setFlashcards(data.flashcards); // Assuming the API response contains a "flashcards" key
   };
-  
 
   const handleCardClick = (id) => {
     setFlipped((prev) => ({
@@ -70,34 +65,50 @@ export default function Generate() {
       alert("Please enter a name");
       return;
     }
-
+  
     const batch = writeBatch(db);
     const userDocRef = doc(collection(db, "users"), user.id);
     const docSnap = await getDoc(userDocRef);
-
+  
+    let collections = [];
+  
     if (docSnap.exists()) {
-      const collections = docSnap.data().flashcards || [];
-      if (collections.find((f) => f.name === name)) {
+      collections = docSnap.data().flashcards || [];
+      const normalizedInputName = name.trim().toLowerCase();
+  console.log(collections.some(f => (f.name || '').trim().toLowerCase() === normalizedInputName))
+      if (collections.some(f => (f.name || '').trim().toLowerCase() === normalizedInputName)) {
         alert("Flashcard collection with the same name already exists");
         return;
       } else {
-        collections.push(name);
+        collections.push({ name });
         batch.set(userDocRef, { flashcards: collections }, { merge: true });
       }
     } else {
       batch.set(userDocRef, { flashcards: [{ name }] });
     }
-
+  
+    if (flashcards.length === 0) {
+      alert("No flashcards to save");
+      return;
+    }
+  
     const colRef = collection(userDocRef, name);
     flashcards.forEach((flashcard) => {
       const cardDocRef = doc(colRef);
       batch.set(cardDocRef, flashcard);
     });
-
-    await batch.commit();
-    handleClose();
-    router.push("/flashcards");
+  
+    try {
+      await batch.commit();
+      handleClose();
+      router.push("/flashcards");
+    } catch (error) {
+      console.error("Error saving flashcards:", error);
+      alert("An error occurred while saving flashcards. Please try again.");
+    }
   };
+  
+  
 
   return (
     <Container maxWidth={false}>

@@ -2,43 +2,72 @@
 
 import { db } from "@/utils/firebase";
 import { useUser } from "@clerk/nextjs";
-import { Container, Grid } from "@mui/material";
-import { collection, getDoc, setDoc, doc } from "firebase/firestore";
+import {
+  Card,
+  CardActionArea,
+  CardContent,
+  Container,
+  Grid,
+  Typography,
+} from "@mui/material";
+import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function Flashcard() {
+export default function Flashcards() {
   const { isLoaded, isSignedIn, user } = useUser();
-  const [flashcards, setFlashcards] = useState();
+  const [flashcards, setFlashcards] = useState([]);
+  const router = useRouter(); // Import and initialize the router
 
   useEffect(() => {
     async function getFlashcards() {
       if (!user) return;
-      const docRef = doc(collection(db, "users"), user.id);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const collections = docSnap.data().flashcards || [];
-        setFlashcards(collections);
-      } else {
-        await setDoc(docRef, { flashcards: [] });
+  
+      try {
+        const userDocRef = doc(db, "users", user.id);
+        const userDocSnap = await getDoc(userDocRef);
+  
+        if (userDocSnap.exists()) {
+          const flashcards = userDocSnap.data().flashcards || [];
+          console.log("User's flashcards:", flashcards);
+          setFlashcards(flashcards);
+        } else {
+          console.log("No user document found.");
+          setFlashcards([]);
+        }
+      } catch (error) {
+        console.error("Error fetching flashcards:", error);
       }
     }
-    getFlashcards()
+  
+    getFlashcards();
   }, [user]);
 
-  if(!isLoaded || !isSignedIn){
-    return <></>
+  if (!isLoaded || !isSignedIn) {
+    return <></>;
   }
 
-  const handleCardClick =(id) =>{
-    router.push(`/flashcard?id=${id}`)
-  }
+  const handleCardClick = (name) => {
+    router.push(`/flashcard?id=${name}`);
+  };
 
-  return( <Container maxWidth="false">
-  <Grid>
-
-  </Grid>
-
-  </Container>)
+  return (
+    <Container maxWidth={false}>
+      <Grid container spacing={3} sx={{ mt: 4 }}>
+        {flashcards.map((flashcard, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <Card>
+              <CardActionArea
+                onClick={() => handleCardClick(flashcard.name)} // Pass the correct id
+              >
+                <CardContent>
+                  <Typography variant="h6">{flashcard.name}</Typography> {/* Access name from flashcard */}
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
+  );
 }
