@@ -1,0 +1,35 @@
+.featuresSection {
+    --scrollbar-color: #00000050;
+    --scrollbar-color-hover: #00000080;
+    --font: "Montserrat", "Segoe UI", sans-serif;
+    --text-opaque: #fff;
+    --text-dim: hsla(0, 0%, 100%, 0.6);
+    --text-color: hsla(0, 0%, 100%, 0.8);
+    --text-error: #e84545;
+    --invert-bg: #fefefe;
+    --invert-text: #000;
+    --border: #dbdbdb;
+    --border-dark: #c2c2c2;
+    font-family: var(--font);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-user-drag: none;
+    box-sizing: border-box;
+    outline: none;
+    overscroll-behavior-x: none;
+    touch-action: manipulation;
+    vertical-align: top;
+    margin: 0 auto;
+    max-width: 1920px;
+    width: 98%;
+    margin-top: 30px !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: center;
+    position: relative;
+    z-index: 5;
+  }
+  

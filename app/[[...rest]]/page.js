@@ -1,3 +1,4 @@
+'use client'
 import Image from "next/image";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Head from "next/head";
@@ -10,8 +11,35 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { getStripe } from "@/utils/get-stripe";
 
 export default function Home() {
+const handleSubmit = async()=>{
+  console.log('button clicked')
+  const checkoutSession = await fetch('/api/checkout_session',{
+    method: 'POST',
+    headers: {
+      origin: 'http://localhost:3000',
+    }
+  });
+  const checkoutSessionJson = await checkoutSession.json();
+
+  if(checkoutSession.statusCode === 5000){
+    console.error(checkoutSession.message)
+    return
+  }
+
+  const stripe = await getStripe();
+  const {error} = await stripe.redirectToCheckout({
+    sessionId: checkoutSessionJson.id
+  })
+
+  if(error){
+    console.warn(error.message)
+  }
+}
+
+
   return (
     <Container maxWidth={false}>
       <Head>
@@ -88,7 +116,7 @@ export default function Home() {
               <Typography variant="h5" gutterBottom >Basic</Typography>
               <Typography variant="h6" gutterBottom>Free</Typography>
               <Typography>{' '} Access to basic flashcard features and limited storage.</Typography>
-              <Button variant="contained" color="primary">choose basic</Button>
+              <Button variant="contained" color="primary" onClick={handleSubmit}>choose basic</Button>
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -106,7 +134,7 @@ export default function Home() {
               <Typography variant="h5" gutterBottom textAlign="center">Pro</Typography>
               <Typography variant="h6" gutterBottom textAlign="center">$10 / month</Typography>
               <Typography>{' '} unlimited flashcard features and storage, with priority support.</Typography>
-              <Button variant="contained" color="primary"  >choose pro</Button>
+              <Button variant="contained" color="primary" onClick={handleSubmit} >choose pro</Button>
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
