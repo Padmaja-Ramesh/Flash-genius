@@ -24,6 +24,7 @@ export default function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "origin":"https://flash-genius-flashcard.vercel.app/"
         },
         body: JSON.stringify({ plan }), // Ensure correct body format
       });
