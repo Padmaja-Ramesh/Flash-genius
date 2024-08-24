@@ -32,7 +32,7 @@ export default function Navbar() {
                 <UserButton />
               </SignedIn>
               <SignedOut>
-                <Button color="inherit" component={Link} href="/login">
+                <Button color="inherit" component={Link} href="/signin">
                   Login
                 </Button>
                 <Button color="inherit" component={Link} href="/signup">
